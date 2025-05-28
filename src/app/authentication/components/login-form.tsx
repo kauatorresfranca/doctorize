@@ -25,6 +25,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+
 const loginSchema = z.object({
   email: z
     .string()

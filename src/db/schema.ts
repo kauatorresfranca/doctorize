@@ -1,5 +1,4 @@
 import { relations } from "drizzle-orm";
-import { date } from "drizzle-orm/mysql-core";
 import {
   boolean,
   integer,
