@@ -13,6 +13,10 @@ import { Plus } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import AddDoctorButton from "./_components/add-doctor-button";
+import { doctorsTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import db from "@/db";
+import DoctorCard from "./_components/doctor-card";
 
 const MedicosPage = async () => {
   const session = await auth.api.getSession({
@@ -24,6 +28,9 @@ const MedicosPage = async () => {
   if (!session.user.clinic) {
     redirect("/clinic-form");
   }
+  const doctors = await db.query.doctorsTable.findMany({
+    where: eq(doctorsTable.clinicId, session.user.clinic.id),
+  });
   return (
     <PageContainer>
       <PageHeader>
@@ -38,7 +45,11 @@ const MedicosPage = async () => {
         </PageActions>
       </PageHeader>
       <PageContent>
-        <h1>medicos</h1>
+        <div className="grid grid-cols-4 gap-6">
+          {doctors.map((doctor) => (
+            <DoctorCard key={doctor.id} doctor={doctor} />
+          ))}
+        </div>
       </PageContent>
     </PageContainer>
   );
