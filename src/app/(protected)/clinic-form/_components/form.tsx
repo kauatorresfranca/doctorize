@@ -1,6 +1,6 @@
 "use client";
 
-import { createClinic } from "@/app/actions/create-clinic";
+import { createClinic } from "@/actions/create-clinic";
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import {
