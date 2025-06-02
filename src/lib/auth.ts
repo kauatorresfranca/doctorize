@@ -1,16 +1,17 @@
-import db from "@/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import * as Schema from "@/db/schema";
-import { userToClinicsTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { customSession } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
+
+import db from "@/db";
+import * as schema from "@/db/schema";
+import { usersToClinicsTable } from "@/db/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg", // or "pg" or "mysql"
+    provider: "pg",
     usePlural: true,
-    schema: Schema,
+    schema,
   }),
   socialProviders: {
     google: {
@@ -20,13 +21,13 @@ export const auth = betterAuth({
   },
   plugins: [
     customSession(async ({ user, session }) => {
-      const clinics = await db.query.userToClinicsTable.findMany({
-        where: eq(userToClinicsTable.userId, user.id),
+      const clinics = await db.query.usersToClinicsTable.findMany({
+        where: eq(usersToClinicsTable.userId, user.id),
         with: {
           clinic: true,
         },
       });
-      //TODO: AO ADAPTAR PARA O USUARIO TER MULTIPLAS CLINICAS, SERÁ NECESSÁRIO ALTERAR A LÓGICA PARA RETORNAR TODAS AS CLINICAS DO USUARIO
+      // TODO: Ao adaptar para o usuário ter múltiplas clínicas, deve-se mudar esse código
       const clinic = clinics?.[0];
       return {
         user: {
