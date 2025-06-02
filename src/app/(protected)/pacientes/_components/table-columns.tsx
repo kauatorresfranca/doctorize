@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef, CellContext } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 
 import { patientsTable } from "@/db/schema";
 
@@ -23,7 +23,7 @@ export const patientsTableColumns: ColumnDef<Patient>[] = [
     id: "phoneNumber",
     accessorKey: "phoneNumber",
     header: "Telefone",
-    cell: (params: CellContext<Patient, unknown>) => {
+    cell: (params) => {
       const patient = params.row.original;
       const phoneNumber = patient.phoneNumber;
       if (!phoneNumber) return "";
@@ -38,14 +38,14 @@ export const patientsTableColumns: ColumnDef<Patient>[] = [
     id: "sex",
     accessorKey: "sex",
     header: "Sexo",
-    cell: (params: CellContext<Patient, unknown>) => {
+    cell: (params) => {
       const patient = params.row.original;
       return patient.sex === "male" ? "Masculino" : "Feminino";
     },
   },
   {
     id: "actions",
-    cell: (params: CellContext<Patient, unknown>) => {
+    cell: (params) => {
       const patient = params.row.original;
       return <PatientsTableActions patient={patient} />;
     },

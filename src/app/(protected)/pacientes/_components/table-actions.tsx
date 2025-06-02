@@ -1,4 +1,7 @@
-"use client";
+import { EditIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { deletePatient } from "@/actions/delete-patient";
 import {
@@ -13,80 +16,92 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { patientsTable } from "@/db/schema";
-import { useAction } from "next-safe-action/hooks";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
-import { toast } from "sonner";
 
-type Patient = typeof patientsTable.$inferSelect;
+import UpsertPatientForm from "./upsert-patient-form";
 
 interface PatientsTableActionsProps {
-  patient: Patient;
-  onEdit?: () => void;
+  patient: typeof patientsTable.$inferSelect;
 }
 
-export default function PatientsTableActions({
-  patient,
-  onEdit,
-}: PatientsTableActionsProps) {
-  const { execute: executeDelete } = useAction(deletePatient, {
+const PatientsTableActions = ({ patient }: PatientsTableActionsProps) => {
+  const [upsertDialogIsOpen, setUpsertDialogIsOpen] = useState(false);
+
+  const deletePatientAction = useAction(deletePatient, {
     onSuccess: () => {
-      toast.success("Paciente excluído com sucesso!");
+      toast.success("Paciente deletado com sucesso.");
     },
-    onError: (error) => {
-      toast.error(error.error?.serverError || "Erro ao excluir paciente");
+    onError: () => {
+      toast.error("Erro ao deletar paciente.");
     },
   });
 
+  const handleDeletePatientClick = () => {
+    if (!patient) return;
+    deletePatientAction.execute({ id: patient.id });
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Abrir menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onEdit}>
-          <Pencil className="mr-2 h-4 w-4" />
-          Editar
-        </DropdownMenuItem>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <Trash className="mr-2 h-4 w-4" />
-              Excluir
+    <>
+      <Dialog open={upsertDialogIsOpen} onOpenChange={setUpsertDialogIsOpen}>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant="ghost" size="icon">
+              <MoreVerticalIcon className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>{patient.name}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setUpsertDialogIsOpen(true)}>
+              <EditIcon />
+              Editar
             </DropdownMenuItem>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Excluir paciente</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tem certeza que deseja excluir este paciente? Esta ação não pode
-                ser desfeita.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => executeDelete({ id: patient.id })}
-              >
-                Excluir
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <TrashIcon />
+                  Excluir
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Tem certeza que deseja deletar esse paciente?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Essa ação não pode ser revertida. Isso irá deletar o
+                    paciente e todas as consultas agendadas.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeletePatientClick}>
+                    Deletar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <UpsertPatientForm
+          isOpen={upsertDialogIsOpen}
+          patient={patient}
+          onSuccess={() => setUpsertDialogIsOpen(false)}
+        />
+      </Dialog>
+    </>
   );
-}
+};
+
+export default PatientsTableActions;
