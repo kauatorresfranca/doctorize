@@ -2,12 +2,24 @@
 
 import {
   CalendarDays,
+  Diamond,
+  Gem,
   LayoutDashboard,
   LogOut,
   Stethoscope,
   UsersRound,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -20,19 +32,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
-import { usePathname, useRouter } from "next/navigation";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-// Menu items.
 const items = [
   {
     title: "Dashboard",
@@ -70,7 +71,6 @@ export function AppSidebar() {
       },
     });
   };
-
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
@@ -91,6 +91,24 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Outros</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/subscription"}
+                >
+                  <Link href="/subscription">
+                    <Gem />
+                    <span>Assinatura</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -115,7 +133,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleSignOut()}>
+                <DropdownMenuItem onClick={handleSignOut}>
                   <LogOut />
                   Sair
                 </DropdownMenuItem>
